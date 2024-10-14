@@ -25,7 +25,12 @@ const Menulist: React.FC<Props> = ({route}): JSX.Element => {
   const {category} = route.params;
 
   const [loading, setLoading] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState(category || '');
+  let selectedCategory = "Services";
+  let [selectedNursery, setSelectedCategory] = useState(category || '');
+  if(selectedNursery === 'Services' || selectedNursery === 'Products') {
+    selectedCategory = selectedNursery;
+    selectedNursery = category;
+  }
 
   const {
     data: productsData,
@@ -39,7 +44,16 @@ const Menulist: React.FC<Props> = ({route}): JSX.Element => {
   } = useGetCategoriesQuery();
 
   const dishes = productsData instanceof Array ? productsData : [];
-  const categories = categoriesData instanceof Array ? categoriesData : [];
+  let categories = [
+    {
+      "id": 32345,
+      "name": "Services",
+    },
+    {
+      "id": 423445,
+      "name": "Products",
+    }
+  ];
 
   if (loading) {
     return <components.Loader />;
@@ -144,7 +158,7 @@ const Menulist: React.FC<Props> = ({route}): JSX.Element => {
                 marginRight: last ? 20 : 8,
                 borderWidth: 1,
                 borderColor:
-                  selectedCategory === item.name
+                selectedNursery === item.name
                     ? theme.colors.mainTurquoise
                     : theme.colors.white,
               }}
@@ -155,7 +169,7 @@ const Menulist: React.FC<Props> = ({route}): JSX.Element => {
               <text.H5
                 style={{
                   color:
-                    selectedCategory === item.name
+                  selectedNursery === item.name
                       ? theme.colors.mainTurquoise
                       : theme.colors.mainColor,
                 }}
@@ -171,7 +185,7 @@ const Menulist: React.FC<Props> = ({route}): JSX.Element => {
 
   const renderContent = () => {
     const dishesByCategory = dishes?.filter((dish) => {
-      return dish.category?.includes(selectedCategory);
+      return dish.category?.includes(selectedNursery) && dish.subCategory==selectedCategory;
     });
     return (
       <ScrollView
