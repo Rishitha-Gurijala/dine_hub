@@ -1,6 +1,5 @@
 import {View, Text, TouchableOpacity} from 'react-native';
 import React, {PropsWithChildren} from 'react';
-
 import Image from '../custom/Image';
 import {theme} from '../../constants';
 import {ProductType} from '../../types';
@@ -12,10 +11,20 @@ import ProductPrice from '../product/ProductPrice';
 type Props = PropsWithChildren<{
   item: ProductType;
   lastItem?: boolean;
+  quantity: number;
+  onAdd: () => void;
+  onRemove: () => void;
 }>;
 
-const MenuListItem: React.FC<Props> = ({item, lastItem}): JSX.Element => {
+const MenuListItem: React.FC<Props> = ({
+  item,
+  lastItem,
+  quantity,
+  onAdd,
+  onRemove,
+}): JSX.Element => {
   const navigation = useAppNavigation();
+
   return (
     <TouchableOpacity
       style={{
@@ -70,6 +79,17 @@ const MenuListItem: React.FC<Props> = ({item, lastItem}): JSX.Element => {
           {item.weight} - {item.calories}
         </Text>
         <ProductPrice item={item} />
+
+        {/* Quantity Controls */}
+        <View style={{flexDirection: 'row', alignItems: 'center'}}>
+          <TouchableOpacity onPress={onRemove} style={{padding: 10}}>
+            <Text style={{fontSize: 20, color: theme.colors.mainColor}}>-</Text>
+          </TouchableOpacity>
+          <Text style={{marginHorizontal: 10, fontSize: 16}}>{quantity}</Text>
+          <TouchableOpacity onPress={onAdd} style={{padding: 10}}>
+            <Text style={{fontSize: 20, color: theme.colors.mainColor}}>+</Text>
+          </TouchableOpacity>
+        </View>
       </View>
     </TouchableOpacity>
   );

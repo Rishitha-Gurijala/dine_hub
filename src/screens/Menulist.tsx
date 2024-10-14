@@ -5,7 +5,6 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  FlatList,
   ScrollView,
 } from 'react-native';
 
@@ -25,12 +24,10 @@ const Menulist: React.FC<Props> = ({route}): JSX.Element => {
   const {category} = route.params;
 
   const [loading, setLoading] = useState(false);
-  let selectedCategory = "Services";
-  let [selectedNursery, setSelectedCategory] = useState(category || '');
-  if(selectedNursery === 'Services' || selectedNursery === 'Products') {
-    selectedCategory = selectedNursery;
-    selectedNursery = category;
-  }
+  const [selectedCategory, setSelectedCategory] = useState(category || '');
+  const [selectedTab, setSelectedTab] = useState<'services' | 'products'>(
+    'services',
+  );
 
   const {
     data: productsData,
@@ -43,17 +40,35 @@ const Menulist: React.FC<Props> = ({route}): JSX.Element => {
     isLoading: categoriesLoading,
   } = useGetCategoriesQuery();
 
-  const dishes = productsData instanceof Array ? productsData : [];
-  let categories = [
-    {
-      "id": 32345,
-      "name": "Services",
-    },
-    {
-      "id": 423445,
-      "name": "Products",
-    }
-  ];
+  const services = productsData instanceof Array ? productsData : [];
+  const categories = categoriesData instanceof Array ? categoriesData : [];
+
+  // Cart state
+  const [cart, setCart] = useState<{[key: string]: number}>({});
+
+  // Functions to manage cart
+  const addToCart = (itemId: string) => {
+    setCart((prevCart) => ({
+      ...prevCart,
+      [itemId]: (prevCart[itemId] || 0) + 1,
+    }));
+  };
+
+  const removeFromCart = (itemId: string) => {
+    setCart((prevCart) => {
+      const currentQuantity = prevCart[itemId] || 0;
+      if (currentQuantity <= 1) {
+        const newCart = {...prevCart};
+        delete newCart[itemId];
+        return newCart;
+      } else {
+        return {
+          ...prevCart,
+          [itemId]: currentQuantity - 1,
+        };
+      }
+    });
+  };
 
   if (loading) {
     return <components.Loader />;
@@ -132,81 +147,144 @@ const Menulist: React.FC<Props> = ({route}): JSX.Element => {
     );
   };
 
-  const renderCategories = () => {
+  const renderTabs = () => {
     return (
-      <FlatList
-        data={categories}
-        horizontal={true}
-        decelerationRate={0}
-        contentContainerStyle={{
-          paddingLeft: 20,
-          marginBottom: 20,
-        }}
+      <View
         style={{
-          flexGrow: 0,
+          flexDirection: 'row',
+          justifyContent: 'space-around',
+          marginHorizontal: 20,
+          marginBottom: 14,
         }}
-        showsHorizontalScrollIndicator={false}
-        renderItem={({item, index}) => {
-          const last = index === categories.length - 1;
-          return (
-            <TouchableOpacity
-              style={{
-                paddingHorizontal: 20,
-                paddingVertical: 10,
-                backgroundColor: theme.colors.white,
-                borderRadius: 10,
-                marginRight: last ? 20 : 8,
-                borderWidth: 1,
-                borderColor:
-                selectedNursery === item.name
-                    ? theme.colors.mainTurquoise
-                    : theme.colors.white,
-              }}
-              onPress={() => {
-                setSelectedCategory(item.name);
-              }}
-            >
-              <text.H5
-                style={{
-                  color:
-                  selectedNursery === item.name
-                      ? theme.colors.mainTurquoise
-                      : theme.colors.mainColor,
-                }}
-              >
-                {item.name}
-              </text.H5>
-            </TouchableOpacity>
-          );
-        }}
-      />
+      >
+        <TouchableOpacity
+          onPress={() => setSelectedTab('services')}
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            paddingVertical: 10,
+            borderBottomWidth: selectedTab === 'services' ? 2 : 0,
+            borderColor: theme.colors.mainTurquoise,
+          }}
+        >
+          <Text
+            style={{
+              color:
+                selectedTab === 'services'
+                  ? theme.colors.mainTurquoise
+                  : theme.colors.textColor,
+              ...theme.fonts.DMSans_400Regular,
+              fontSize: 16,
+            }}
+          >
+            Services
+          </Text>
+        </TouchableOpacity>
+
+        <TouchableOpacity
+          onPress={() => setSelectedTab('products')}
+          style={{
+            flex: 1,
+            alignItems: 'center',
+            paddingVertical: 10,
+            borderBottomWidth: selectedTab === 'products' ? 2 : 0,
+            borderColor: theme.colors.mainTurquoise,
+          }}
+        >
+          <Text
+            style={{
+              color:
+                selectedTab === 'products'
+                  ? theme.colors.mainTurquoise
+                  : theme.colors.textColor,
+              ...theme.fonts.DMSans_400Regular,
+              fontSize: 16,
+            }}
+          >
+            Products
+          </Text>
+        </TouchableOpacity>
+      </View>
     );
   };
 
   const renderContent = () => {
-    const dishesByCategory = dishes?.filter((dish) => {
-      return dish.category?.includes(selectedNursery) && dish.subCategory==selectedCategory;
-    });
-    return (
-      <ScrollView
-        contentContainerStyle={{
-          flexGrow: 1,
-          paddingHorizontal: 20,
-        }}
-        showsVerticalScrollIndicator={false}
-      >
-        {dishesByCategory?.map((item, index, array) => {
-          const lastItem = index === array.length - 1;
-          return (
-            <components.MenuListItem
-              item={item}
-              lastItem={lastItem}
-              key={item.id}
-            />
-          );
-        })}
-      </ScrollView>
-    );
+    if (selectedTab === 'services') {
+      const servicesByCategory = services?.filter((service) =>
+        service.category?.includes(selectedCategory),
+      );
+
+      if (servicesByCategory.length === 0) {
+        return (
+          <View
+            style={{
+              flex: 1,
+              justifyContent: 'center',
+              alignItems: 'center',
+              paddingHorizontal: 20,
+            }}
+          >
+            <Text
+              style={{
+                fontSize: 18,
+                color: theme.colors.textColor,
+                textAlign: 'center',
+                ...theme.fonts.DMSans_400Regular,
+              }}
+            >
+              No services are available at your location
+            </Text>
+          </View>
+        );
+      }
+
+      return (
+        <ScrollView
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingHorizontal: 20,
+          }}
+          showsVerticalScrollIndicator={false}
+        >
+          {servicesByCategory?.map((item, index, array) => {
+            const lastItem = index === array.length - 1;
+            const quantity = cart[item.id] || 0; // Get quantity from cart
+            return (
+              <components.MenuListItem
+                item={item}
+                lastItem={lastItem}
+                key={item.id}
+                quantity={quantity} // Pass the quantity to MenuListItem
+                onAdd={() => addToCart(item.id)} // Pass add function
+                onRemove={() => removeFromCart(item.id)} // Pass remove function
+              />
+            );
+          })}
+        </ScrollView>
+      );
+    } else {
+      return (
+        <View
+          style={{
+            flex: 1,
+            justifyContent: 'center',
+            alignItems: 'center',
+            paddingHorizontal: 20,
+          }}
+        >
+          <Text
+            style={{
+              fontSize: 18,
+              color: theme.colors.textColor,
+              textAlign: 'center',
+              ...theme.fonts.DMSans_400Regular,
+            }}
+          >
+            No products are available from this nursery
+          </Text>
+        </View>
+      );
+    }
   };
 
   const renderHomeIndicator = () => {
@@ -218,7 +296,7 @@ const Menulist: React.FC<Props> = ({route}): JSX.Element => {
       {renderStatusBar()}
       {renderHeader()}
       {renderSearchBar()}
-      {renderCategories()}
+      {renderTabs()}
       {renderContent()}
       {renderHomeIndicator()}
     </components.SmartView>
