@@ -23,7 +23,7 @@ const SignIn: React.FC = (): JSX.Element => {
     if (phoneNumber.trim()) {
       try {
         // API request to check if user exists
-        const response = await fetch('https://api subhadip gives me', {
+        const response = await fetch('https://api subhadip gives to me', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
