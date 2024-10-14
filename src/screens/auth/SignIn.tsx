@@ -1,5 +1,12 @@
 import React, {useState} from 'react';
-import {View, Text, ViewStyle, TextStyle, TouchableOpacity} from 'react-native';
+import {
+  View,
+  Text,
+  TextStyle,
+  ViewStyle,
+  TouchableOpacity,
+  TextInput,
+} from 'react-native';
 
 import {text} from '../../text';
 import {svg} from '../../assets/svg';
@@ -10,10 +17,37 @@ import {homeIndicatorHeight} from '../../utils';
 
 const SignIn: React.FC = (): JSX.Element => {
   const navigation = useAppNavigation();
+  const [phoneNumber, setPhoneNumber] = useState<string>('');
 
-  const [email, setEmail] = useState<string>('');
-  const [password, setPassword] = useState<string>('');
-  const [rememberMe, setRememberMe] = useState<boolean>(false);
+  const handleProceed = async () => {
+    if (phoneNumber.trim()) {
+      try {
+        // API request to check if user exists
+        const response = await fetch('https://api subhadip gives me', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify({
+            phoneNumber: phoneNumber.trim(),
+          }),
+        });
+
+        const result = await response.json();
+
+        if (result.userExists) {
+          navigation.navigate('TabNavigator');
+        } else {
+          navigation.navigate('SignUp');
+        }
+      } catch (error) {
+        console.error('Error checking user:', error);
+        alert('An error occurred. Please try again.');
+      }
+    } else {
+      alert('Please enter a valid phone number');
+    }
+  };
 
   const renderStatusBar = () => {
     return <components.StatusBar />;
@@ -24,134 +58,43 @@ const SignIn: React.FC = (): JSX.Element => {
   };
 
   const renderWelcome = () => {
-    return <text.H1 style={{marginBottom: 14}}>Welcome Back!</text.H1>;
+    return <text.H1 style={{marginBottom: 14}}>Welcome To Flitzy!</text.H1>;
   };
 
   const renderDescription = () => {
-    return <text.T16 style={{marginBottom: 30}}>Sign in to continue</text.T16>;
-  };
-
-  const renderInputFields = () => {
     return (
-      <React.Fragment>
-        <components.InputField
-          type='email'
-          value={email}
-          checkIcon={true}
-          placeholder='jordanhebert@mail.com'
-          onChangeText={(text) => setEmail(text)}
-          containerStyle={{marginBottom: 14}}
-        />
-        <components.InputField
-          type='password'
-          value={password}
-          eyeOffIcon={true}
-          secureTextEntry={true}
-          placeholder='••••••••'
-          onChangeText={(text) => setPassword(text)}
-          containerStyle={{marginBottom: 20}}
-        />
-      </React.Fragment>
+      <text.T16 style={{marginBottom: 30}}>
+        Enter your phone number to proceed
+      </text.T16>
     );
   };
 
-  const renderForgotPassword = () => {
-    const textStyles: TextStyle = {
-      ...theme.fonts.textStyle_14,
-      color: theme.colors.mainTurquoise,
-    };
-
+  const renderInputField = () => {
     return (
-      <Text
-        onPress={() => navigation.navigate('ForgotPassword')}
-        style={{...textStyles}}
-      >
-        Forgot password?
-      </Text>
-    );
-  };
-
-  const renderRememberMe = () => {
-    return (
-      <TouchableOpacity
-        style={{flexDirection: 'row', alignItems: 'center'}}
-        onPress={() => setRememberMe(!rememberMe)}
-      >
-        <View
-          style={{
-            width: 18,
-            height: 18,
-            backgroundColor: '#E6EFF8',
-            borderRadius: 4,
-            marginRight: 10,
-            justifyContent: 'center',
-            alignItems: 'center',
-          }}
-        >
-          {rememberMe && (
-            <View
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 2,
-                backgroundColor: theme.colors.mainTurquoise,
-              }}
-            />
-          )}
-        </View>
-        <text.T14>Remember me</text.T14>
-      </TouchableOpacity>
-    );
-  };
-
-  const renderAdditionalButtons = () => {
-    const containerStyle: ViewStyle = {
-      flexDirection: 'row',
-      alignItems: 'center',
-      justifyContent: 'space-between',
-      marginBottom: 40,
-    };
-
-    return (
-      <View style={{...containerStyle}}>
-        {renderRememberMe()}
-        {renderForgotPassword()}
-      </View>
-    );
-  };
-
-  const renderContent = () => {
-    const styles: ViewStyle = {
-      flexGrow: 1,
-      backgroundColor: theme.colors.white,
-      paddingHorizontal: 20,
-      marginHorizontal: 20,
-      borderTopEndRadius: 10,
-      borderTopStartRadius: 10,
-      justifyContent: 'center',
-      marginTop: 10,
-    };
-
-    return (
-      <components.KAScrollView contentContainerStyle={{...styles}}>
-        {renderWelcome()}
-        {renderDescription()}
-        {renderInputFields()}
-        {renderAdditionalButtons()}
-        {renderButton()}
-        {renderDonTHaveAccount()}
-      </components.KAScrollView>
+      <TextInput
+        value={phoneNumber}
+        onChangeText={setPhoneNumber}
+        keyboardType='phone-pad'
+        placeholder='Phone Number'
+        style={{
+          borderWidth: 1,
+          borderColor: theme.colors.borderColor,
+          borderRadius: 10,
+          padding: 15,
+          marginBottom: 20,
+          fontSize: 16,
+          color: theme.colors.text,
+        }}
+      />
     );
   };
 
   const renderButton = () => {
     return (
       <components.Button
-        title='Sign in'
+        title='Proceed'
         containerStyle={{marginBottom: 20}}
-        onPress={() => {
-          navigation.navigate('TabNavigator');
-        }}
+        onPress={handleProceed}
       />
     );
   };
@@ -163,7 +106,7 @@ const SignIn: React.FC = (): JSX.Element => {
           {
             pattern: /Sign up./,
             style: {color: theme.colors.mainTurquoise},
-            onPress: () => navigation.navigate('SignUp'),
+            onPress: () => navigation.navigate('TabNavigator'), // for now i changed to tabnavigator thats it this renderDontHaveaccount is of no use
           },
         ]}
       >
@@ -206,6 +149,29 @@ const SignIn: React.FC = (): JSX.Element => {
 
   const renderHomeIndicator = () => {
     return <components.HomeIndicator />;
+  };
+
+  const renderContent = () => {
+    const styles: ViewStyle = {
+      flexGrow: 1,
+      backgroundColor: theme.colors.white,
+      paddingHorizontal: 20,
+      marginHorizontal: 20,
+      borderTopEndRadius: 10,
+      borderTopStartRadius: 10,
+      justifyContent: 'center',
+      marginTop: 10,
+    };
+
+    return (
+      <components.KAScrollView contentContainerStyle={{...styles}}>
+        {renderWelcome()}
+        {renderDescription()}
+        {renderInputField()}
+        {renderButton()}
+        {renderDonTHaveAccount()}
+      </components.KAScrollView>
+    );
   };
 
   return (
