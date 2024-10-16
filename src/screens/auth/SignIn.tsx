@@ -1,13 +1,5 @@
 import React, {useState} from 'react';
-import {
-  View,
-  Text,
-  TextStyle,
-  ViewStyle,
-  TouchableOpacity,
-  TextInput,
-} from 'react-native';
-
+import {View, TextInput} from 'react-native';
 import {text} from '../../text';
 import {svg} from '../../assets/svg';
 import {theme} from '../../constants';
@@ -18,27 +10,35 @@ import {homeIndicatorHeight} from '../../utils';
 const SignIn: React.FC = (): JSX.Element => {
   const navigation = useAppNavigation();
   const [phoneNumber, setPhoneNumber] = useState<string>('');
+  const [countryCode, setCountryCode] = useState<string>('91'); // Default to country code 91 for India, modify as needed.
 
   const handleProceed = async () => {
     if (phoneNumber.trim()) {
       try {
-        // API request to check if user exists
-        const response = await fetch('https://api subhadip gives to me', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
+        const response = await fetch(
+          'here keep the api end point of verify-mobile from subhadip_s flitzy-auth repo',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              phoneNumber: phoneNumber.trim(),
+              countryCode: countryCode.trim(),
+            }),
           },
-          body: JSON.stringify({
-            phoneNumber: phoneNumber.trim(),
-          }),
-        });
+        );
 
         const result = await response.json();
 
-        if (result.userExists) {
-          navigation.navigate('TabNavigator');
+        if (result) {
+          if (result === true) {
+            navigation.navigate('TabNavigator');
+          } else {
+            navigation.navigate('SignUp');
+          }
         } else {
-          navigation.navigate('SignUp');
+          alert('Error verifying user. Please try again.');
         }
       } catch (error) {
         console.error('Error checking user:', error);
@@ -106,7 +106,7 @@ const SignIn: React.FC = (): JSX.Element => {
           {
             pattern: /Sign up./,
             style: {color: theme.colors.mainTurquoise},
-            onPress: () => navigation.navigate('TabNavigator'), // for now i changed to tabnavigator thats it this renderDontHaveaccount is of no use
+            onPress: () => navigation.navigate('TabNavigator'), // For now, no action. Can be redirected to 'SignUp'
           },
         ]}
       >
