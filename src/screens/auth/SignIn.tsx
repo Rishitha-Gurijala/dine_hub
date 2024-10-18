@@ -1,5 +1,5 @@
 import React, {useState} from 'react';
-import {View, TextInput} from 'react-native';
+import {View, TextInput, ViewStyle} from 'react-native';
 import {text} from '../../text';
 import {svg} from '../../assets/svg';
 import {theme} from '../../constants';
@@ -10,13 +10,14 @@ import {homeIndicatorHeight} from '../../utils';
 const SignIn: React.FC = (): JSX.Element => {
   const navigation = useAppNavigation();
   const [phoneNumber, setPhoneNumber] = useState<string>('');
-  const [countryCode, setCountryCode] = useState<string>('91'); // Default to country code 91 for India, modify as needed.
+  const [countryCode, setCountryCode] = useState<string>('91');
 
   const handleProceed = async () => {
     if (phoneNumber.trim()) {
       try {
-        const response = await fetch(
-          'here keep the api end point of verify-mobile from subhadip_s flitzy-auth repo',
+        //      here the verify-mobile api will check whether the phone numebr is present in the database or ont
+        const verifyResponse = await fetch(
+          'here put the verify-mobile api endpoint ',
           {
             method: 'POST',
             headers: {
@@ -29,12 +30,38 @@ const SignIn: React.FC = (): JSX.Element => {
           },
         );
 
-        const result = await response.json();
+        const verifyResult = await verifyResponse.json();
 
-        if (result) {
-          if (result === true) {
-            navigation.navigate('TabNavigator');
+        if (verifyResult) {
+          // If the phone number is found in the database
+          if (verifyResult === true) {
+            // Step 2: Send OTP using the 'send-otp' API
+            const otpResponse = await fetch(
+              'here put the send-otp end point to send the otp ',
+              {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                  phoneNumber: phoneNumber.trim(),
+                  countryCode: countryCode.trim(),
+                }),
+              },
+            );
+
+            const otpResult = await otpResponse.json();
+
+            if (otpResult.success) {
+              navigation.navigate('ConfirmationCode', {
+                phoneNumber: phoneNumber.trim(),
+                countryCode: countryCode.trim(),
+              });
+            } else {
+              alert('Failed to send OTP. Please try again.');
+            }
           } else {
+            //if the phone number is not there it should go to the sign up screen right like that
             navigation.navigate('SignUp');
           }
         } else {
@@ -106,7 +133,7 @@ const SignIn: React.FC = (): JSX.Element => {
           {
             pattern: /Sign up./,
             style: {color: theme.colors.mainTurquoise},
-            onPress: () => navigation.navigate('TabNavigator'), // For now, no action. Can be redirected to 'SignUp'
+            onPress: () => navigation.navigate('SignUp'),
           },
         ]}
       >
