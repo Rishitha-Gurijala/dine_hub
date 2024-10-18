@@ -1,13 +1,12 @@
 import axios from 'axios';
-import {View, TextInput, TouchableOpacity} from 'react-native';
+import {View, TextInput, TouchableOpacity, Image} from 'react-native';
 import React, {useState, useEffect, useRef} from 'react';
-
+import * as ImagePicker from 'expo-image-picker'; // Import the image picker
 import {svg} from '../assets/svg';
 import {theme} from '../constants';
 import {showMessage} from '../utils';
 import {components} from '../components';
 import {useAppNavigation} from '../hooks';
-import {validation} from '../utils/validation';
 import {setUser} from '../store/slices/userSlice';
 import {BASE_URL, ENDPOINTS, CONFIG} from '../config';
 import {useAppSelector, useAppDispatch} from '../hooks';
@@ -18,13 +17,11 @@ const EditProfile: React.FC = (): JSX.Element => {
   const dispatch = useAppDispatch();
 
   const [loading, setLoading] = useState<boolean>(false);
-
   const [email, setEmail] = useState<string>('');
   const [country, setCountry] = useState<string>('');
   const [userName, setUserName] = useState<string>('');
   const [phone, setPhone] = useState<string>('');
-
-  const data = {email, userName, country};
+  const [image, setImage] = useState<string | null>(null); // To store the selected image
 
   const inp1Ref = useRef<TextInput>({focus: () => {}} as TextInput);
   const inp2Ref = useRef<TextInput>({focus: () => {}} as TextInput);
@@ -39,6 +36,30 @@ const EditProfile: React.FC = (): JSX.Element => {
     }
   }, [loading]);
 
+  // Function to handle image selection
+  const pickImage = async () => {
+    // Ask for permission
+    const permissionResult =
+      await ImagePicker.requestMediaLibraryPermissionsAsync();
+
+    if (permissionResult.granted === false) {
+      alert('Permission to access camera roll is required!');
+      return;
+    }
+
+    // Open image picker
+    let result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+
+    if (!result.canceled) {
+      setImage(result.assets[0].uri); // Set the selected image
+    }
+  };
+
   const renderStatusBar = () => {
     return <components.StatusBar />;
   };
@@ -50,6 +71,7 @@ const EditProfile: React.FC = (): JSX.Element => {
   const renderUserImage = () => {
     return (
       <TouchableOpacity
+        onPress={pickImage} // Trigger image picker on press
         style={{
           width: 100,
           height: 100,
@@ -59,17 +81,31 @@ const EditProfile: React.FC = (): JSX.Element => {
           alignItems: 'center',
         }}
       >
-        <components.Image
-          source={{
-            uri: 'https://george-fx.github.io/dine-hub/10.jpg',
-          }}
-          style={{
-            position: 'absolute',
-            width: '100%',
-            height: '100%',
-            borderRadius: 50,
-          }}
-        />
+        {/* Display the selected image if available */}
+        {image ? (
+          <Image
+            source={{uri: image}} // Use the selected image's URI
+            style={{
+              width: '100%',
+              height: '100%',
+              borderRadius: 50,
+            }}
+          />
+        ) : (
+          <components.Image
+            source={{
+              uri: 'https://george-fx.github.io/dine-hub/10.jpg', // Default image
+            }}
+            style={{
+              position: 'absolute',
+              width: '100%',
+              height: '100%',
+              borderRadius: 50,
+            }}
+          />
+        )}
+
+        {/* Overlay and icon for picking an image */}
         <View
           style={{
             backgroundColor: theme.colors.mainColor,
@@ -131,10 +167,60 @@ const EditProfile: React.FC = (): JSX.Element => {
     return (
       <View>
         <components.Button
-          title='save changes'
+          title='Save changes'
           loading={loading}
-          onPress={() => {
-            navigation.goBack();
+          onPress={async () => {
+            setLoading(true);
+            try {
+              // Prepare form data
+              const formData = new FormData();
+              formData.append('email', email);
+              formData.append('userName', userName);
+              formData.append('country', country);
+              formData.append('phone', phone);
+
+              let imageFile = null; // Initialize imageFile variable
+
+              if (image) {
+                imageFile = {
+                  uri: image,
+                  name: 'profile.jpg',
+                  type: 'image/jpeg',
+                };
+                formData.append('profileImage', imageFile);
+              }
+
+              // Log the form data to console
+              console.log('Form Data:', {
+                email,
+                userName,
+                country,
+                phone,
+                profileImage: imageFile, // Log imageFile (it will be null if not set)
+              });
+
+              // Example POST request (adjust based on your API)
+              const response = await axios.post(
+                `${BASE_URL}${ENDPOINTS.EDIT_PROFILE}`,
+                formData,
+                {
+                  headers: {
+                    'Content-Type': 'multipart/form-data',
+                    ...CONFIG.headers,
+                  },
+                },
+              );
+
+              // Assuming the response returns the updated user
+              dispatch(setUser(response.data.user));
+              showMessage('Profile updated successfully!');
+              navigation.goBack();
+            } catch (error) {
+              showMessage('Failed to update profile. Please try again.');
+              console.error('Error updating profile:', error); // Log the error for debugging
+            } finally {
+              setLoading(false);
+            }
           }}
           containerStyle={{marginBottom: 14}}
         />

@@ -20,6 +20,7 @@ import ConfirmationCode from './auth/ConfirmationCode';
 import SignUpaccountCreated from './auth/SignUpaccountCreated';
 import VerifyYourPhoneNumber from './auth/VerifyYourPhoneNumber';
 import ForgotPasswordSentEmail from './auth/ForgotPasswordSentEmail';
+import LocationScreen from './auth/LocationScreen';
 
 // Tabs
 import Home from './tabs/Home';
@@ -56,4 +57,5 @@ export const screens = {
   SignUpaccountCreated,
   VerifyYourPhoneNumber,
   ForgotPasswordSentEmail,
+  LocationScreen,
 };

@@ -96,7 +96,7 @@ const SignUp: React.FC = (): JSX.Element => {
           {
             pattern: /Sign in./,
             style: {color: theme.colors.mainTurquoise},
-            onPress: () => navigation.replace('SignIn'),
+            onPress: () => navigation.replace('LocationScreen'),
           },
         ]}
       >

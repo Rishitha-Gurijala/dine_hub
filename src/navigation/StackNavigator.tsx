@@ -124,6 +124,12 @@ const StackNavigator: React.FC = () => {
         component={screens.AddANewCard}
         options={{headerShown: false}}
       />
+
+      <Stack.Screen
+        name='LocationScreen'
+        component={screens.LocationScreen}
+        options={{headerShown: false}}
+      />
     </Stack.Navigator>
   );
 };

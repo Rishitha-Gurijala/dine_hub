@@ -2,14 +2,13 @@ import ParsedText from 'react-native-parsed-text';
 import React, {useRef, useState} from 'react';
 import {View, Text, TextInput, ViewStyle} from 'react-native';
 import {responsiveFontSize} from 'react-native-responsive-dimensions';
+
 import {components} from '../../components';
 import {theme, sizes} from '../../constants';
-import {useAppNavigation, useRoute} from '../../hooks';
+import {useAppNavigation} from '../../hooks';
 
 const ConfirmationCode: React.FC = (): JSX.Element => {
   const navigation = useAppNavigation();
-  const route = useRoute();
-  const {phoneNumber, countryCode} = route.params; // Received from previous screen
 
   const inp1Ref = useRef<TextInput>({focus: () => {}} as TextInput);
   const inp2Ref = useRef<TextInput>({focus: () => {}} as TextInput);
@@ -20,46 +19,6 @@ const ConfirmationCode: React.FC = (): JSX.Element => {
   const [inp2, setInp2] = useState<string>('');
   const [inp3, setInp3] = useState<string>('');
   const [inp4, setInp4] = useState<string>('');
-
-  const handleOTPVerification = async () => {
-    const otp = inp1 + inp2 + inp3 + inp4;
-
-    if (otp.length !== 4) {
-      alert('Please enter a valid 4-digit OTP.');
-      return;
-    }
-
-    try {
-      const response = await fetch(
-        'verify-otp-api-endpoint', // here checking the otp is right or not using the verify-mobile otp
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            phoneNumber,
-            countryCode,
-            otp, // The OTP entered by the user
-          }),
-        },
-      );
-
-      const result = await response.json();
-
-      if (result.success) {
-        navigation.reset({
-          index: 0,
-          routes: [{name: 'TabNavigator'}], //  navigation to TabNavigator
-        });
-      } else {
-        alert('Incorrect OTP entered. Please try again.');
-      }
-    } catch (error) {
-      console.error('Error verifying OTP:', error);
-      alert('An error occurred while verifying the OTP. Please try again.');
-    }
-  };
 
   const renderStatusBar = () => {
     return <components.StatusBar />;
@@ -193,9 +152,7 @@ const ConfirmationCode: React.FC = (): JSX.Element => {
           {
             pattern: /Resend./,
             style: {color: theme.colors.mainTurquoise},
-            onPress: () => {
-              // Logic to resend OTP can be added here
-            },
+            onPress: () => {},
           },
         ]}
       >
@@ -207,8 +164,13 @@ const ConfirmationCode: React.FC = (): JSX.Element => {
   const renderButton = () => {
     return (
       <components.Button
-        title='Verify'
-        onPress={handleOTPVerification} // Trigger OTP verification
+        title='verify'
+        onPress={() => {
+          navigation.reset({
+            index: 0,
+            routes: [{name: 'SignUpaccountCreated'}],
+          });
+        }}
       />
     );
   };
