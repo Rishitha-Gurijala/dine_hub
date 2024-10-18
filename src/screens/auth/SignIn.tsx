@@ -142,6 +142,22 @@ const SignIn: React.FC = (): JSX.Element => {
     );
   };
 
+  const backup = () => {
+    return (
+      <components.ParsedText
+        parse={[
+          {
+            pattern: /go to home/,
+            style: {color: theme.colors.mainTurquoise},
+            onPress: () => navigation.navigate('TabNavigator'),
+          },
+        ]}
+      >
+        just for testing go to home
+      </components.ParsedText>
+    );
+  };
+
   const renderFooter = () => {
     const styles: ViewStyle = {
       backgroundColor: theme.colors.white,
@@ -197,6 +213,7 @@ const SignIn: React.FC = (): JSX.Element => {
         {renderInputField()}
         {renderButton()}
         {renderDonTHaveAccount()}
+        {backup()}
       </components.KAScrollView>
     );
   };
