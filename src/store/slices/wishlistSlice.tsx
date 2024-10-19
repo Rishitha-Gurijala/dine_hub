@@ -24,6 +24,21 @@ export const wishlistSlice = createSlice({
         state.list.push({
           ...action.payload,
         });
+        fetch("http://localhost:3000/api/wishlist", {
+          method: "POST",
+          headers: {
+            Accept: "application/json",
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            userId: '634501',
+            wishListProduct: action.payload.id,
+            operation: "add"
+          }),
+        }).then((response) => response.json()).then((responseData) => {
+          console.log('===========Add============')
+            console.log(JSON.stringify(responseData));
+          })
       }
     },
     removeFromWishlist: (state, action: PayloadAction<ProductType>) => {
@@ -34,6 +49,21 @@ export const wishlistSlice = createSlice({
       if (inWishlist) {
         state.list = state.list.filter((item) => item.id !== action.payload.id);
       }
+      fetch("http://localhost:3000/api/wishlist", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: '634501',
+          wishListProduct: action.payload.id,
+          operation: "delete"
+        }),
+      }).then((response) => response.json()).then((responseData) => {
+        console.log('===========Remove============')
+          console.log(JSON.stringify(responseData));
+        })
     },
   },
 });

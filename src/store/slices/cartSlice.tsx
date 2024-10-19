@@ -52,6 +52,22 @@ export const cartSlice = createSlice({
           Number(state.subtotal) + Number(action.payload.price)
         ).toFixed(2);
       }
+
+      fetch("http://localhost:3000/api/cart", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: '634501',
+          cartProduct: action.payload.id,
+          operation: "add"
+        }),
+      }).then((response) => response.json()).then((responseData) => {
+        console.log('===========Add============')
+          console.log(JSON.stringify(responseData));
+        })
     },
     removeFromCart: (state, action: PayloadAction<ProductType>) => {
       const inCart = state.list.find((item) => item.id === action.payload.id);
@@ -74,6 +90,24 @@ export const cartSlice = createSlice({
         state.subtotal = (
           Number(state.subtotal) - Number(action.payload.price)
         ).toFixed(2);
+
+        
+      fetch("http://localhost:3000/api/cart", {
+        method: "POST",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          userId: '634501',
+          cartProduct: action.payload.id,
+          operation: "delete"
+        }),
+      }).then((response) => response.json()).then((responseData) => {
+        console.log('===========Delete============')
+          console.log(JSON.stringify(responseData));
+        })
+
       }
     },
 

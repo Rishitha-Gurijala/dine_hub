@@ -23,6 +23,16 @@ const ProductInWishlist: React.FC<Props> = ({
   const dispatch = useAppDispatch();
 
   const wishlist = useAppSelector((state) => state.wishlistSlice.list);
+  fetch("http://localhost:3000/api/wishlistItems", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      userId: '634501'
+    })}).then((response) => response.json()).then((responseData) => {
+      console.log(JSON.stringify(responseData))
+    })
   const itemExist = (item: ProductType) =>
     wishlist.find((i) => i.id === item.id);
 
