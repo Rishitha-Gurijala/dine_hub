@@ -9,7 +9,7 @@ import {PersistGate} from 'redux-persist/integration/react';
 import StackNavigator from './src/navigation/StackNavigator';
 import {NavigationContainer} from '@react-navigation/native';
 import {SafeAreaProvider} from 'react-native-safe-area-context';
-
+ 
 export default function App() {
   const [fontsLoaded] = useFonts({
     'DMSans-Bold': require('./src/assets/fonts/DMSans-Bold.ttf'),
