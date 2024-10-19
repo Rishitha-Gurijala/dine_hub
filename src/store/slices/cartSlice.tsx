@@ -56,7 +56,7 @@ export const cartSlice = createSlice({
     removeFromCart: (state, action: PayloadAction<ProductType>) => {
       const inCart = state.list.find((item) => item.id === action.payload.id);
 
-      if (inCart) {
+      if (inCart) { 
         state.list.map((item) => {
           if (item.id === action.payload.id && (item.quantity as number) > 1) {
             if (item.quantity) {
