@@ -1,5 +1,5 @@
 import React from 'react';
-import {View, Text, TouchableOpacity, ScrollView, Alert} from 'react-native';
+import {View, Text, TouchableOpacity, ScrollView} from 'react-native';
 
 import {text} from '../text';
 import {svg} from '../assets/svg';
@@ -9,11 +9,7 @@ import {useAppDispatch} from '../hooks';
 import {components} from '../components';
 import type {RootStackParamList} from '../types';
 import {useAppNavigation} from '../hooks';
-import {
-  removeFromCart,
-  addToCart,
-  fullRemoveFromCart,
-} from '../store/slices/cartSlice';
+import {removeFromCart, addToCart} from '../store/slices/cartSlice';
 import type {NativeStackScreenProps} from '@react-navigation/native-stack';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Product'>;
@@ -23,11 +19,11 @@ const Product: React.FC<Props> = ({route}): JSX.Element => {
   const navigation = useAppNavigation();
   const dispatch = useAppDispatch();
 
+  const quantity = (quantityInCart(item) as number) || 0;
+
   const renderStatusBar = () => {
     return <components.StatusBar />;
   };
-
-  const quantity = (quantityInCart(item) as number) || 0;
 
   const renderHeader = () => {
     return <components.Header basket={true} goBack={true} />;
@@ -92,31 +88,6 @@ const Product: React.FC<Props> = ({route}): JSX.Element => {
     );
   };
 
-  const renderAlert = () => {
-    if (quantity > 0) {
-      Alert.alert(
-        'Item already in cart',
-        'Do you want to add another one?',
-        [
-          {
-            text: 'Cancel',
-            style: 'cancel',
-          },
-          {
-            text: 'OK',
-            onPress: () => {
-              dispatch(fullRemoveFromCart(item));
-              dispatch(addToCart(item));
-              addedToCartMessage(item);
-            },
-          },
-        ],
-        {cancelable: false},
-      );
-      return;
-    }
-  };
-
   const renderButtons = () => {
     return (
       <View style={{paddingHorizontal: 20, paddingBottom: 10}}>
@@ -160,10 +131,6 @@ const Product: React.FC<Props> = ({route}): JSX.Element => {
           title='+ Add to cart'
           containerStyle={{marginBottom: 14}}
           onPress={() => {
-            if (quantity > 0) {
-              renderAlert();
-              return;
-            }
             dispatch(addToCart(item));
             addedToCartMessage(item);
           }}
